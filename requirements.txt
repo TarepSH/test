@@ -1,0 +1,9 @@
+psycopg2-binary>=2.9
+python-dateutil>=2.9
+confluent-kafka>=2.3
+faust-streaming>=0.10.14
+prometheus-client>=0.20
+redis>=5.0
+streamlit>=1.33
+clickhouse-connect>=0.7.6
+pandas>=2.2

@@ -1,0 +1,56 @@
+{
+  "name": "pg-content-engagement-cdc",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "plugin.name": "pgoutput",
+
+    "database.hostname": "postgres",
+    "database.port": "5432",
+    "database.user": "dbz",
+    "database.password": "dbz",
+    "database.dbname": "appdb",
+
+    "topic.prefix": "app",
+    "slot.name": "dbz_slot_content_engagement",
+
+    "publication.name": "dbz_publication",
+    "publication.autocreate.mode": "disabled",
+
+    "table.include.list": "public.content,public.engagement_events",
+
+    "snapshot.mode": "initial",
+    "tombstones.on.delete": "false",
+    "heartbeat.interval.ms": "5000",
+
+    "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "key.converter.schemas.enable": "false",
+    "value.converter.schemas.enable": "false",
+
+    "transforms": "unwrap,toKey,extractKey,routeContent,routeEngage",
+
+    "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+    "transforms.unwrap.delete.handling.mode": "drop",
+    "transforms.unwrap.add.fields": "op,table,source.ts_ms",
+
+    "predicates": "isEngage",
+    "predicates.isEngage.type": "org.apache.kafka.connect.transforms.predicates.TopicNameMatches",
+    "predicates.isEngage.pattern": "app\\.public\\.engagement_events",
+
+    "transforms.toKey.type": "org.apache.kafka.connect.transforms.ValueToKey",
+    "transforms.toKey.fields": "content_id",
+    "transforms.toKey.predicate": "isEngage",
+
+    "transforms.extractKey.type": "org.apache.kafka.connect.transforms.ExtractField$Key",
+    "transforms.extractKey.field": "content_id",
+    "transforms.extractKey.predicate": "isEngage",
+
+    "transforms.routeContent.type": "org.apache.kafka.connect.transforms.RegexRouter",
+    "transforms.routeContent.regex": "app\\.public\\.content",
+    "transforms.routeContent.replacement": "content.flat",
+
+    "transforms.routeEngage.type": "org.apache.kafka.connect.transforms.RegexRouter",
+    "transforms.routeEngage.regex": "app\\.public\\.engagement_events",
+    "transforms.routeEngage.replacement": "engagement_events.flat"
+  }
+}
